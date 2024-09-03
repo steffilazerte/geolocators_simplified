@@ -37,3 +37,9 @@ Developed for [Matt Reudink](https://www.mattreudink.com/)
     - Ctrl-Shift-K to render OR
     - Click on the "Render" button
     - The `process_SGAT_BIRDID.html` is now your reproducible record of this analysis.
+
+
+## Demo files
+
+- <https://steffilazerte.ca/geolocators_simplified/process_SGAT_ID000539.html>
+- <https://steffilazerte.ca/geolocators_simplified/process_SGAT_ID000547.html>
