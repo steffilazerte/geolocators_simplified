@@ -1,0 +1,272 @@
+---
+title: SGAT processing for IDXXXXXXX
+author: Somebody
+date: today
+format: 
+  html: 
+    toc: true
+    toc-depth: 3
+    lightbox: true
+---
+
+> Put your name as the Author (above)  
+> Add the bird's ID (this should be part of the file name)
+
+```{r setup_details}
+#| message: false
+source("XX_setup.R")
+id <- "IDXXXXXXX"
+```
+
+:::{.callout-notes}
+Notes to explain any relevant details about this analysis, this individual or 
+this study.
+:::
+
+### Load the data
+
+Try to automatically find the relevant geolocator files based on the ID provided.
+
+```{r loading_data}
+raw <- read_geo(id = id)
+```
+
+### First look
+
+```{r first_look}
+light_plot(raw)
+```
+
+### Check the date range
+
+Sometimes geolocators are turned on before they are placed on the bird, or they
+are still active when they are removed. 
+
+If you know the dates of deployment and retrival, skip to the next step and use
+those dates in the `filter_date()` function. Otherwise, look at this figure
+and see if the **proposed cutoff** dates seem good to you. If so, use those or
+tweak them as required.
+
+> Pick a first/last dates as needed
+
+:::{.callout-note}
+Add notes explaining your choice(s)
+:::
+
+```{r checking_dates, fig.cap = "Proposed cutoff dates"}
+check_date_range(raw)
+```
+
+```{r filtering_dates , fig.cap = "Filtered data"}
+raw_filtered <- filter_date(raw, first = NULL, last = NULL)
+light_plot(raw_filtered)
+```
+
+
+### Check for adjustments
+
+Here we're looking at the full light patterns over the migration. 
+Sometimes the patterns of sunrise and sunset don't actually line up with the 
+times they should be at. 
+
+#### Initial light by time
+
+First we look at the current patterns.
+
+If you see that the yellow line doesn't seem to follow light/dark patterns *before/after* 
+migration, then we need to apply an adjustment.
+
+> 1. Consider if you need to cutoff any more data from the date range (see previous step).  
+> 2. Consider if you need to adjust the times (next step)
+
+```{r checking_times}
+light_plot(raw_filtered)
+```
+
+### Determine the adjustment
+
+If the yellow line doesn't follow the light/dark patterns above, play around
+with an adjustment (in minutes).
+
+Explore different adjustments in the summer, before migration.
+
+> Preview some adjustments (in minutes)
+
+```{r adjusting_times_plot, fig.cap = "Preview of early season with adjustment", out.width = "50%", fig.asp = 2}
+check_adjust(raw_filtered, adjust = c(80, 90, 100))
+```
+
+> Choose the one that looks best and apply that.
+
+```{r adjusting_times_apply, fig.cap = "Adjusted data"}
+raw_adjust <- apply_adjust(raw_filtered, 0)
+light_plot(raw_adjust)
+```
+
+
+## Twilights
+
+First let's get a threshold. This is the light at the 50th quantile by default
+but can be adjusted. 
+
+Look at the sampled light patterns across different seasons to see if the threshold
+is appropriate. We want, as much as possible, only to identify truly dark/nighttime
+periods (i.e. the flat nightime lines/points should be the only points in yellow).
+
+> Pick a threshold and test it out (`q` is quantile, 0.5 is the 50th)
+
+:::{.callout-note}
+Add notes explaining your choice(s)
+:::
+
+```{r twighlight_threshold}
+threshold <- nighttime_light(raw_adjust, q = 0.5)
+threshold
+```
+
+Now look at how this threshold identifies sunrise/sunset across the whole period.
+
+- If there are a lot of points in the **middle of the night (dark area), increase the threshold**
+- If there are a lot of points in the **daytime (light areas), decrease the threshold**
+- **If the next step gives you an error, try increasing the threshold**
+
+> Go back and adjust the threshold above as necessary
+
+```{r detect_twilights}
+t <- twl(raw_adjust, threshold)
+```
+
+Now we'll tweak and smooth these times.
+
+
+### Tweaking
+
+We'll tweak the twilights, but the smoothing will do most of the work, so
+don't worry about tweaking too much.
+
+Comparing to four points around a given twilight event (two on each side)...
+
+- `outlier` is the number of minutes to identify an outlier point
+  - **Increasing this moves more points to the middle**
+- `stationary` is the number of minutes that twilights can vary, if assuming the bird is stationary
+  - **Decreasing this deletes more points**
+- Note that points with X's are deleted
+
+> Feel free to tweek `outlier` and `stationary` as needed
+
+```{r adjust_twilights}
+t_adjust <- twl_edit(t, outlier = 25, stationary = 15) 
+
+light_plot(raw_adjust, twl = t_adjust)
+```
+
+### Smoothing
+
+This will smooth over all the variations.
+
+> Fiddle with the `smoother` to find the right level of smoothing you want.
+
+```{r smooth_twilights}
+t_smooth <- twl_smooth(t_adjust, smoother = 0.1)
+light_plot(raw_adjust, twl = t_smooth)
+```
+
+## Modelling
+
+### Calibration
+
+Here we use a [breeding season calibration ](https://geolocationmanual.vogelwarte.ch/SGAT.html#calibration-1)
+
+Specify dates during which we know the birds were around, and hopefully, 
+showing reasonable patterns of dawn/dusk.
+
+Try to ensure a reasonable distribution (i.e. enough points). This may mean 
+you need to look about ~2 months if you can.
+
+Below, the first figure shows the date range to use in calibration with the dotted yellow lines.
+The second figure shows the calibration results (saved to `calib` for use in the model later).
+
+> Pick the start/end dates for the calibration you'd like to run.
+
+:::{.callout-note}
+Add notes explaining your choice(s)
+:::
+
+```{r model_calibration, fig.asp = 1.5}
+calib <- calibration(raw_adjust, t_smooth, dates = c("2020-01-01", "2020-12-31"))
+```
+
+### Initial paths
+
+For the models, we'll need to create some [initial paths](https://geolocationmanual.vogelwarte.ch/SGAT.html#initial-path).
+
+We will also set the first and last 2 points as known to be at the deployment
+site. 
+
+Choose a tolerance that is 
+
+- as low as possible
+- without giving really weird paths
+- generally <= 0.18
+
+> Choose a tolerance (`tol`) between 0 and 0.18
+
+:::{.callout-note}
+Add notes explaining your choice(s)
+:::
+
+```{r initial_paths}
+coords <- initial_path(t_smooth, calib, tol = 0.1, 
+                       first_known = TRUE, last_known = TRUE)
+```
+
+
+### Run the model
+
+Here we'll prepare and run the model. We'll supply the mean and sd of a beta distribution for the expected speed of movements. The first number is the mean in km per hour, the second is the standard deviation. 
+
+Fast animals will want higher values e.g., `c(2.2, 0.08)`, slower animals will want smaller numbers e.g., `c(1, 0.08)`
+
+> Decide on a beta distribution. 
+
+:::{.callout-note}
+Add notes explaining your choice(s)
+:::
+
+```{r run_model}
+fit <- run_estelle_model(t_smooth, coords, calib, beta = c(1, 0.08))
+```
+
+Double check that the chains are well mixed 
+(*Ask someone familiar with Bayesian to explore thins*)
+
+> Adjust the longitude and latitude limits as needed (`lon_lim` and `lat_lim`), 
+> these specify the limits of the y-axis in the coordinate plots.
+
+```{r check_model}
+check_estelle_model(fit, coords)
+```
+
+### Explore model results
+
+> Adjust the longitude and latitude limits as needed (`lon_lim` and `lat_lim`), 
+> these specify the limits of the y-axis in the coordinate plots.
+
+```{r create_maps}
+model_map_tiles(fit, coords)
+model_map_points(fit)
+model_plot_coords(fit, lon_lim = c(-150, -100), lat_lim = c(30, 80))
+```
+
+### Save the data
+```{r save_data}
+write_rds(raw_adjust, paste0("outputs/raw_adjust_", id, ".rds"))
+write_rds(t_adjust, paste0("outputs/t_adjust_", id, ".rds"))
+write_rds(t_smooth, paste0("outputs/t_smooth_", id, ".rds"))
+write_rds(fit, paste0("outputs/model_fit_", id, ".rds"))
+```
+
+# Session Info
+```{r}
+devtools::session_info()
+```
