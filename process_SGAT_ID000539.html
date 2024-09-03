@@ -569,10 +569,10 @@ shorter object length</code></pre>
 <section id="save-the-data" class="level1">
 <h1>Save the data</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(raw_adjust, <span class="fu">paste0</span>(<span class="st">"outputs/raw_adjust_"</span>, id, <span class="st">".rds"</span>))</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(t_adjust, <span class="fu">paste0</span>(<span class="st">"outputs/t_adjust_"</span>, id, <span class="st">".rds"</span>))</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(t_smooth, <span class="fu">paste0</span>(<span class="st">"outputs/t_smooth_"</span>, id, <span class="st">".rds"</span>))</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(fit, <span class="fu">paste0</span>(<span class="st">"outputs/model_fit_"</span>, id, <span class="st">".rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(raw_adjust, <span class="fu">paste0</span>(<span class="st">"Outputs/raw_adjust_"</span>, id, <span class="st">".rds"</span>))</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(t_adjust, <span class="fu">paste0</span>(<span class="st">"Outputs/t_adjust_"</span>, id, <span class="st">".rds"</span>))</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(t_smooth, <span class="fu">paste0</span>(<span class="st">"Outputs/t_smooth_"</span>, id, <span class="st">".rds"</span>))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(fit, <span class="fu">paste0</span>(<span class="st">"Outputs/model_fit_"</span>, id, <span class="st">".rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="session-info" class="level1">
@@ -1099,7 +1099,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","selector":".lightbox","openEffect":"zoom","loop":false,"closeEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"loop":false,"openEffect":"zoom","closeEffect":"zoom","descPosition":"bottom","selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

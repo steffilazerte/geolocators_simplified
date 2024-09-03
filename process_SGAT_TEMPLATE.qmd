@@ -260,10 +260,10 @@ model_plot_coords(fit, lon_lim = c(-150, -100), lat_lim = c(30, 80))
 
 ### Save the data
 ```{r save_data}
-write_rds(raw_adjust, paste0("outputs/raw_adjust_", id, ".rds"))
-write_rds(t_adjust, paste0("outputs/t_adjust_", id, ".rds"))
-write_rds(t_smooth, paste0("outputs/t_smooth_", id, ".rds"))
-write_rds(fit, paste0("outputs/model_fit_", id, ".rds"))
+write_rds(raw_adjust, paste0("Outputs/raw_adjust_", id, ".rds"))
+write_rds(t_adjust, paste0("Outputs/t_adjust_", id, ".rds"))
+write_rds(t_smooth, paste0("Outputs/t_smooth_", id, ".rds"))
+write_rds(fit, paste0("Outputs/model_fit_", id, ".rds"))
 ```
 
 # Session Info

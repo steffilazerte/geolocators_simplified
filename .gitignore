@@ -4,3 +4,10 @@
 .httr-oauth
 .DS_Store
 .quarto
+
+/Data/*
+!Data/README.md
+Outputs
+Archive
+Docs
+*_files/

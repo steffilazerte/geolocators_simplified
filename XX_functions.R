@@ -2,7 +2,7 @@ read_geo <- function(id, offset = NULL, file_type = "csv") {
 
   message("Finding ", file_type, " file for bird ", id)
 
-  f <- fs::dir_ls("Data/Raw", recurse = TRUE) |>
+  f <- fs::dir_ls("Data", recurse = TRUE) |>
     str_subset(regex(id, ignore_case = TRUE)) |>
     str_subset(paste0("\\.", file_type, "$"))
 
